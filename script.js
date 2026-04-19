@@ -71,24 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
              daysResult.textContent = `Casi ${formattedDays} día${days !== 1 ? 's' : ''} de trabajo`;
         }
 
-        // Determine impact level considering absolute wage power
-        // The higher the wage, the higher the discretionary income proportion.
-        // We set $15/hr as a baseline standard. Higher wages relax the hour thresholds.
-        let wageMultiplier = Math.max(1, wage / 15);
-        
-        // Cap the multiplier so ultra-rich still get warned eventually
-        wageMultiplier = Math.min(wageMultiplier, 3);
-
-        let thresholdMed = 8 * wageMultiplier;
-        let thresholdHigh = 16 * wageMultiplier;
-        let thresholdExtreme = 40 * wageMultiplier;
-
+        // Determine impact level
+        // Time is the ultimate universal currency.
+        // If the user's wage is higher, 'hours' naturally decreases for the same price.
         let level = 'low';
-        if (hours > thresholdExtreme) {
+        if (hours > 40) {
             level = 'extreme';
-        } else if (hours > thresholdHigh) {
+        } else if (hours > 16) {
             level = 'high';
-        } else if (hours > thresholdMed) {
+        } else if (hours > 8) {
             level = 'med';
         }
 
