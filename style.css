@@ -170,6 +170,37 @@ button#calculate-btn:active {
     box-shadow: 0 5px 10px rgba(59, 130, 246, 0.3);
 }
 
+/* Category Chips */
+.category-chips {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.chip {
+    flex: 1;
+    background: var(--app-bg-top);
+    border: none;
+    padding: 0.8rem 0.4rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    box-shadow: 
+        4px 4px 8px var(--shadow-dark),
+        -4px -4px 8px var(--shadow-light);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.chip.active {
+    color: var(--primary);
+    box-shadow: 
+        inset 4px 4px 8px var(--shadow-dark),
+        inset -4px -4px 8px var(--shadow-light);
+}
+
 /* Result Section */
 #result-section {
     margin-top: 2rem;
@@ -192,17 +223,35 @@ button#calculate-btn:active {
 }
 
 #hours-result {
-    font-size: 3rem;
+    font-size: 2.8rem;
     font-weight: 800;
     line-height: 1;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.5rem;
     color: var(--primary);
     letter-spacing: -1px;
 }
 
+.cd-text {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.8rem;
+}
+
+.matrix-status {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin-bottom: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .days-text {
     color: var(--text-muted);
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
 }

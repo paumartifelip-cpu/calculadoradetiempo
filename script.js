@@ -1,16 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
     const calculateBtn = document.getElementById('calculate-btn');
     const priceInput = document.getElementById('price');
-    const wageInput = document.getElementById('wage');
+    const salaryInput = document.getElementById('monthly-salary');
     const resultSection = document.getElementById('result-section');
     
     const hoursResult = document.getElementById('hours-result');
+    const cdResult = document.getElementById('cd-result');
+    const matrixStatus = document.getElementById('matrix-status');
     const daysResult = document.getElementById('days-result');
     const visualBar = document.getElementById('visual-bar');
     const emotionalMessage = document.getElementById('emotional-message');
     const shareBtn = document.getElementById('share-btn');
+    const verdictCard = document.getElementById('verdict-card');
+    const verdictText = document.getElementById('verdict-text');
     
+    const chips = document.querySelectorAll('.chip');
+    let selectedCategory = 'lujo';
+    let currentCD = 0;
     let currentHours = 0;
+
+    // Chip selection logic
+    chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            chips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            selectedCategory = chip.dataset.category;
+        });
+    });
 
     // Initial load animations with GSAP
     gsap.to('header', { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' });
@@ -19,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     calculateBtn.addEventListener('click', calculateImpact);
     
     // Enable calculation on Enter key
-    [priceInput, wageInput].forEach(input => {
+    [priceInput, salaryInput].forEach(input => {
         input.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 calculateImpact();
@@ -29,21 +45,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateImpact() {
         const price = parseFloat(priceInput.value);
-        const wage = parseFloat(wageInput.value);
+        const monthlySalary = parseFloat(salaryInput.value);
 
-        if (isNaN(price) || isNaN(wage) || price <= 0 || wage <= 0) {
+        if (isNaN(price) || isNaN(monthlySalary) || price <= 0 || monthlySalary <= 0) {
             alert('Por favor, introduce valores numéricos válidos y mayores a 0.');
             return;
         }
 
-        const hours = price / wage;
-        const days = hours / 8; // assuming an 8-hour workday
+        // SDN = Sueldo Diario Neto
+        const sdn = monthlySalary / 30;
+        const cd = price / sdn; // Costo en Días
+        currentCD = cd;
+
+        // Complementary: Hours of life (assuming 160h work month)
+        const hourlyWage = monthlySalary / 160;
+        const hours = price / hourlyWage;
+        const days = hours / 8;
         currentHours = hours;
 
-        showResults(hours, days);
+        showResults(cd, hours, days, sdn);
     }
 
-    function showResults(hours, days) {
+    function showResults(cd, hours, days, sdn) {
         // Display result section if hidden
         if (resultSection.classList.contains('hidden')) {
             resultSection.classList.remove('hidden');
@@ -54,64 +77,67 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Animate elements inside result card
-        gsap.fromTo([hoursResult, daysResult, emotionalMessage], 
+        gsap.fromTo([hoursResult, cdResult, matrixStatus, daysResult, emotionalMessage], 
             { y: 20, opacity: 0 }, 
             { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'back.out(1.5)' }
         );
 
         // Format numbers
-        const formattedHours = hours % 1 === 0 ? hours.toFixed(0) : hours.toFixed(1);
-        const formattedDays = days < 0.1 ? (days * 8).toFixed(1) + ' horas' : days.toFixed(1);
+        const formattedCD = cd.toFixed(1);
+        const formattedHours = hours.toFixed(1);
 
-        hoursResult.textContent = `${formattedHours} hora${hours !== 1 ? 's' : ''}`;
+        cdResult.textContent = `${formattedCD} Días de Esfuerzo (CD)`;
+        hoursResult.textContent = `${formattedHours} Horas de Vida`;
         
-        if (days < 1) {
-             daysResult.textContent = `Menos de 1 día de trabajo`;
-        } else {
-             daysResult.textContent = `Casi ${formattedDays} día${days !== 1 ? 's' : ''} de trabajo`;
-        }
+        // Decision Matrix
+        const decision = getMatrixDecision(cd, selectedCategory);
+        matrixStatus.textContent = decision.label;
+        matrixStatus.style.backgroundColor = decision.bgColor;
+        matrixStatus.style.color = decision.textColor;
 
-        // Determine impact level considering Purchasing Power (the user's request)
-        // Baseline wage (approx. minimum/living wage in EU)
-        const baselineWage = 12; 
-        
-        // For every 15 units above the baseline, we increase the tolerance for 'hours'
-        // This reflects that high earners have more disposable income proportion.
-        let comfortMultiplier = 1 + Math.max(0, (wage - baselineWage) / 15);
-        comfortMultiplier = Math.min(comfortMultiplier, 4); // Cap at 4x thresholds
+        daysResult.textContent = `Sueldo diario: ${sdn.toFixed(2)}€ | Categoría: ${selectedCategory.toUpperCase()}`;
 
-        const thresholdMed = 8 * comfortMultiplier;
-        const thresholdHigh = 16 * comfortMultiplier;
-        const thresholdExtreme = 40 * comfortMultiplier;
-
-        let level = 'low';
-        if (hours > thresholdExtreme) {
-            level = 'extreme';
-        } else if (hours > thresholdHigh) {
-            level = 'high';
-        } else if (hours > thresholdMed) {
-            level = 'med';
-        }
-
-        updateVisuals(hours, level);
-        setEmotionalMessage(level, hours);
-        setVerdict(level, hours);
+        updateVisuals(cd, decision.level);
+        setEmotionalMessage(decision.level, hours);
+        setVerdict(decision, cd);
     }
 
-    function updateVisuals(hours, level) {
+    function getMatrixDecision(cd, cat) {
+        // Matrix logic according to user request
+        if (cd <= 2) {
+            if (cat === 'inversion') return { label: '⭐ Excelente', level: 'low', bgColor: '#dcfce7', textColor: '#166534' };
+            if (cat === 'utilidad') return { label: '✅ Muy Buena', level: 'low', bgColor: '#dcfce7', textColor: '#166534' };
+            return { label: '✅ Aceptable', level: 'low', bgColor: '#f0f9ff', textColor: '#075985' };
+        } 
+        if (cd <= 5) {
+            if (cat === 'inversion') return { label: '✅ Buena', level: 'med', bgColor: '#fef9c3', textColor: '#854d0e' };
+            if (cat === 'utilidad') return { label: '⚠️ Límite', level: 'med', bgColor: '#ffedd5', textColor: '#9a3412' };
+            return { label: '❌ Mala Compra', level: 'high', bgColor: '#fee2e2', textColor: '#991b1b' };
+        }
+        if (cd <= 15) {
+            if (cat === 'inversion') return { label: '⚠️ Analizar', level: 'med', bgColor: '#ffedd5', textColor: '#9a3412' };
+            if (cat === 'utilidad') return { label: '❌ Mala Compra', level: 'high', bgColor: '#fee2e2', textColor: '#991b1b' };
+            return { label: '🚫 Error Financiero', level: 'extreme', bgColor: '#7f1d1d', textColor: '#ffffff' };
+        }
+        // +15 days
+        if (cat === 'inversion') return { label: '🔍 Solo con Ahorro', level: 'high', bgColor: '#fef9c3', textColor: '#854d0e' };
+        if (cat === 'utilidad') return { label: '🚫 No Comprar', level: 'extreme', bgColor: '#fee2e2', textColor: '#991b1b' };
+        return { label: '‼️ Peligro de Deuda', level: 'extreme', bgColor: '#450a0a', textColor: '#ffffff' };
+    }
+
+    function updateVisuals(cd, level) {
         const colors = {
-            low: 'var(--impact-low)',
-            med: 'var(--impact-med)',
-            high: 'var(--impact-high)',
-            extreme: 'var(--impact-extreme)'
+            low: '#3b82f6',
+            med: '#f59e0b',
+            high: '#ef4444',
+            extreme: '#7f1d1d'
         };
 
-        // Determine bar width (cap at 100%, 100% = 160 hours / 1 month)
-        let fillPercentage = (hours / 160) * 100;
+        // Bar width based on CD (30 days = 100%)
+        let fillPercentage = (cd / 30) * 100;
         if (fillPercentage > 100) fillPercentage = 100;
-        if (fillPercentage < 2) fillPercentage = 2; // minimum visibility
+        if (fillPercentage < 2) fillPercentage = 2;
 
-        // Animate width with GSAP
         gsap.to(visualBar, {
             width: `${fillPercentage}%`,
             backgroundColor: colors[level],
@@ -152,43 +178,38 @@ document.addEventListener('DOMContentLoaded', () => {
         emotionalMessage.textContent = randomMsg;
     }
 
-    function setVerdict(level, hours) {
-        const verdictCard = document.getElementById('verdict-card');
-        const verdictText = document.getElementById('verdict-text');
-        
+    function setVerdict(decision, cd) {
         verdictCard.classList.remove('hidden');
         
-        let verdict = "";
-        let color = "";
-
-        if (level === 'low') {
-            verdict = "✅ Compra Aprobada. Tienes un margen financiero cómodo para este gasto. ¡Disfrútalo sin culpas!";
-            color = "var(--impact-low)";
-        } else if (level === 'med') {
-            verdict = "⚠️ Gasto Moderado. Es aceptable si realmente le vas a dar uso, pero piénsalo dos veces si es un impulso.";
-            color = "var(--impact-med)";
-        } else if (level === 'high') {
-            verdict = "🔴 Impacto Elevado. Estás comprometiendo una parte significativa de tu vida laboral. ¿Seguro que lo vale?";
-            color = "var(--impact-high)";
+        let msg = "";
+        let isBad = decision.level === 'high' || decision.level === 'extreme' || decision.label.includes('Límite');
+        
+        // Context based on category
+        if (selectedCategory === 'inversion') {
+            msg = "Como es una **Inversión (Activo)**, sacrificas esfuerzo presente por una herramienta que trabajará para ti durante años.";
+        } else if (selectedCategory === 'utilidad') {
+            msg = "Esta es una compra de **Utilidad**. No deberías trabajar más de una semana completa para pagar algo que se depreciará.";
         } else {
-            verdict = "❌ Alerta de Derroche. Incluso con tu nivel de ingresos, este gasto supone un sacrificio de tiempo excesivo. Reconsidera.";
-            color = "var(--impact-extreme)";
+            msg = "Esto es **Lujo/Gasto**. Si trabajas más de 48h para un capricho efímero, estás quemando demasiado tiempo vital.";
         }
 
-        verdictText.textContent = verdict;
+        if (isBad) {
+            msg += "<br><br>💡 **Factor de Corrección:** Solo es buena compra si puedes pagarla **3 veces en efectivo** ahora mismo sin tocar tus ahorros de emergencia.";
+        }
+
+        verdictText.innerHTML = msg;
         
         gsap.fromTo(verdictCard, 
             { scale: 0.9, opacity: 0 }, 
             { scale: 1, opacity: 1, duration: 0.5, delay: 0.4, ease: 'back.out(1.2)' }
         );
         
-        gsap.to(verdictCard, { borderColor: color, duration: 0.5 });
+        gsap.to(verdictCard, { borderColor: decision.textColor, duration: 0.5 });
     }
 
     // Share functionality
     shareBtn.addEventListener('click', async () => {
-        const formattedHours = currentHours % 1 === 0 ? currentHours.toFixed(0) : currentHours.toFixed(1);
-        const text = `Este capricho cuesta ${formattedHours} horas de mi vida 😳.\n\nDescubre cuánto cuestan tus compras en tiempo de vida:`;
+        const text = `Este capricho me cuesta ${currentCD.toFixed(1)} días de mi vida (${currentCD > 2 ? '⚠️' : '✅'}).\n\nDescubre tu Índice de Retorno Personal aquí:`;
         
         if (navigator.share) {
             try {

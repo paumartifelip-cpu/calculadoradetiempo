@@ -24,10 +24,19 @@
             </div>
 
             <div class="input-group">
-                <label for="wage">Tu salario por hora</label>
+                <label for="monthly-salary">Sueldo mensual neto (libre)</label>
                 <div class="input-wrapper">
                     <span class="currency-symbol">€</span>
-                    <input type="number" id="wage" placeholder="0.00" min="0" step="0.01">
+                    <input type="number" id="monthly-salary" placeholder="0.00" min="0" step="1">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Categoría de la compra</label>
+                <div class="category-chips">
+                    <button type="button" class="chip active" data-category="lujo">Lujo</button>
+                    <button type="button" class="chip" data-category="utilidad">Utilidad</button>
+                    <button type="button" class="chip" data-category="inversion">Inversión</button>
                 </div>
             </div>
 
@@ -36,6 +45,8 @@
             <div id="result-section" class="hidden">
                 <div class="result-card" id="result-card">
                     <h2 id="hours-result">0 horas</h2>
+                    <h3 id="cd-result" class="cd-text">0 días de esfuerzo (CD)</h3>
+                    <div id="matrix-status" class="matrix-status"></div>
                     <p id="days-result" class="days-text">0 días de trabajo</p>
                     
                     <div class="visual-bar-container">
