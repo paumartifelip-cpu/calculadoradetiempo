@@ -71,13 +71,24 @@ document.addEventListener('DOMContentLoaded', () => {
              daysResult.textContent = `Casi ${formattedDays} día${days !== 1 ? 's' : ''} de trabajo`;
         }
 
-        // Determine impact level
+        // Determine impact level considering absolute wage power
+        // The higher the wage, the higher the discretionary income proportion.
+        // We set $15/hr as a baseline standard. Higher wages relax the hour thresholds.
+        let wageMultiplier = Math.max(1, wage / 15);
+        
+        // Cap the multiplier so ultra-rich still get warned eventually
+        wageMultiplier = Math.min(wageMultiplier, 3);
+
+        let thresholdMed = 8 * wageMultiplier;
+        let thresholdHigh = 16 * wageMultiplier;
+        let thresholdExtreme = 40 * wageMultiplier;
+
         let level = 'low';
-        if (hours > 40) {
+        if (hours > thresholdExtreme) {
             level = 'extreme';
-        } else if (hours > 16) {
+        } else if (hours > thresholdHigh) {
             level = 'high';
-        } else if (hours > 8) {
+        } else if (hours > thresholdMed) {
             level = 'med';
         }
 
