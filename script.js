@@ -71,15 +71,25 @@ document.addEventListener('DOMContentLoaded', () => {
              daysResult.textContent = `Casi ${formattedDays} día${days !== 1 ? 's' : ''} de trabajo`;
         }
 
-        // Determine impact level
-        // Time is the ultimate universal currency.
-        // If the user's wage is higher, 'hours' naturally decreases for the same price.
+        // Determine impact level considering Purchasing Power (the user's request)
+        // Baseline wage (approx. minimum/living wage in EU)
+        const baselineWage = 12; 
+        
+        // For every 15 units above the baseline, we increase the tolerance for 'hours'
+        // This reflects that high earners have more disposable income proportion.
+        let comfortMultiplier = 1 + Math.max(0, (wage - baselineWage) / 15);
+        comfortMultiplier = Math.min(comfortMultiplier, 4); // Cap at 4x thresholds
+
+        const thresholdMed = 8 * comfortMultiplier;
+        const thresholdHigh = 16 * comfortMultiplier;
+        const thresholdExtreme = 40 * comfortMultiplier;
+
         let level = 'low';
-        if (hours > 40) {
+        if (hours > thresholdExtreme) {
             level = 'extreme';
-        } else if (hours > 16) {
+        } else if (hours > thresholdHigh) {
             level = 'high';
-        } else if (hours > 8) {
+        } else if (hours > thresholdMed) {
             level = 'med';
         }
 
@@ -152,16 +162,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let color = "";
 
         if (level === 'low') {
-            verdict = "✅ Compra Aprobada. A nivel de tiempo, es un gasto asumible que no comprometerá tu calidad de vida.";
+            verdict = "✅ Compra Aprobada. Tienes un margen financiero cómodo para este gasto. ¡Disfrútalo sin culpas!";
             color = "var(--impact-low)";
         } else if (level === 'med') {
-            verdict = "⚠️ Piensalo de nuevo. ¿Ese artículo realmente vale tu esfuerzo de varios días de trabajo? Si es una necesidad, adelante; si es un impulso, evítalo.";
+            verdict = "⚠️ Gasto Moderado. Es aceptable si realmente le vas a dar uso, pero piénsalo dos veces si es un impulso.";
             color = "var(--impact-med)";
         } else if (level === 'high') {
-            verdict = "🔴 Mala Inversión. Estás cambiando una porción vital de tu tiempo irrecuperable por algo material. Reconsidera urgentemente.";
+            verdict = "🔴 Impacto Elevado. Estás comprometiendo una parte significativa de tu vida laboral. ¿Seguro que lo vale?";
             color = "var(--impact-high)";
         } else {
-            verdict = "❌ Compra Tóxica. Esto es un secuestro de tu tiempo futuro. A menos que sea una emergencia de vida o muerte, cierra la billetera ahora mismo.";
+            verdict = "❌ Alerta de Derroche. Incluso con tu nivel de ingresos, este gasto supone un sacrificio de tiempo excesivo. Reconsidera.";
             color = "var(--impact-extreme)";
         }
 
