@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Cuántas horas de tu vida cuesta?</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>¿Cuántas horas<br>de tu vida <span>cuesta esto?</span></h1>
+            <p>Descubre el valor real de tus compras.</p>
+        </header>
+
+        <main>
+            <div class="input-group">
+                <label for="price">Precio del capricho</label>
+                <div class="input-wrapper">
+                    <span class="currency-symbol">$</span>
+                    <input type="number" id="price" placeholder="0.00" min="0" step="0.01">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="wage">Tu salario por hora</label>
+                <div class="input-wrapper">
+                    <span class="currency-symbol">$</span>
+                    <input type="number" id="wage" placeholder="0.00" min="0" step="0.01">
+                </div>
+            </div>
+
+            <button id="calculate-btn">Calcular impacto</button>
+
+            <div id="result-section" class="hidden">
+                <div class="result-card" id="result-card">
+                    <h2 id="hours-result">0 horas</h2>
+                    <p id="days-result" class="days-text">0 días de trabajo</p>
+                    
+                    <div class="visual-bar-container">
+                        <div id="visual-bar" class="visual-bar"></div>
+                    </div>
+                    
+                    <p id="emotional-message" class="message"></p>
+                    
+                    <button id="share-btn" class="share-btn">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        Compartir resultado
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
