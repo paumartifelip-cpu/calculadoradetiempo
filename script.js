@@ -157,11 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     messages: [
                         {
                             role: "system",
-                            content: "Eres un asesor financiero viral, sarcástico y un poco 'judgy'. Tu objetivo es evaluar si una compra es estúpida o genial basándote en el Índice de Retorno Personal (IRP). Sé breve (máximo 2-3 frases), usa emojis y sé un poco burlón si el Costo en Días (CD) es alto para un Lujo."
+                            content: "Eres un asesor financiero viral, sarcástico y extremadamente honesto. Tu objetivo es evaluar si una compra es inteligente o un desastre financiero basándote en el Índice de Retorno Personal (IRP) y en TU CONOCIMIENTO sobre el producto. Analiza si el producto suele ser una buena inversión de largo plazo o un gasto efímero. Sé breve (2-3 frases), usa emojis y no tengas miedo de ser burlón si la compra no tiene sentido financiero."
                         },
                         {
                             role: "user",
-                            content: `Producto: ${product}. Precio: ${price}€. Categoría: ${category}. Costo en Días (CD): ${cd.toFixed(1)}. ¿Qué opinas?`
+                            content: `Producto: ${product}. Precio proporcionado: ${price}€. Categoría seleccionada: ${category}. Costo en Días (CD): ${cd.toFixed(1)}. Según tu conocimiento de este producto y estas cifras, ¿es una compra inteligente?`
                         }
                     ],
                     temperature: 0.8
