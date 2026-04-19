@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let currentHours = 0;
 
+    // Initial load animations with GSAP
+    gsap.to('header', { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' });
+    gsap.to('main', { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.2 });
+
     calculateBtn.addEventListener('click', calculateImpact);
     
     // Enable calculation on Enter key
@@ -41,16 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showResults(hours, days) {
         // Display result section if hidden
-        resultSection.classList.remove('hidden');
+        if (resultSection.classList.contains('hidden')) {
+            resultSection.classList.remove('hidden');
+            gsap.fromTo(resultSection, 
+                { height: 0, opacity: 0 }, 
+                { height: 'auto', opacity: 1, duration: 0.6, ease: 'power3.out' }
+            );
+        }
         
-        // Remove animation class to reset it
-        hoursResult.classList.remove('pop-in');
-        
-        // Trigger reflow
-        void hoursResult.offsetWidth;
-        
-        // Add animation class
-        hoursResult.classList.add('pop-in');
+        // Animate elements inside result card
+        gsap.fromTo([hoursResult, daysResult, emotionalMessage], 
+            { y: 20, opacity: 0 }, 
+            { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'back.out(1.5)' }
+        );
 
         // Format numbers
         const formattedHours = hours % 1 === 0 ? hours.toFixed(0) : hours.toFixed(1);
@@ -76,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateVisuals(hours, level);
         setEmotionalMessage(level, hours);
+        setVerdict(level, hours);
     }
 
     function updateVisuals(hours, level) {
@@ -91,15 +99,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fillPercentage > 100) fillPercentage = 100;
         if (fillPercentage < 2) fillPercentage = 2; // minimum visibility
 
-        // Animate width
-        setTimeout(() => {
-            visualBar.style.width = `${fillPercentage}%`;
-            visualBar.style.backgroundColor = colors[level];
-            hoursResult.style.color = colors[level];
-            
-            // Add a glow effect matching the color
-            visualBar.style.boxShadow = `0 0 10px ${colors[level]}`;
-        }, 100);
+        // Animate width with GSAP
+        gsap.to(visualBar, {
+            width: `${fillPercentage}%`,
+            backgroundColor: colors[level],
+            boxShadow: `0 0 15px ${colors[level]}`,
+            duration: 1.2,
+            ease: "power2.out",
+            delay: 0.2
+        });
+        
+        gsap.to(hoursResult, { color: colors[level], duration: 0.5 });
     }
 
     function setEmotionalMessage(level, hours) {
@@ -128,6 +138,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const randomMsg = messages[level][Math.floor(Math.random() * messages[level].length)];
         emotionalMessage.textContent = randomMsg;
+    }
+
+    function setVerdict(level, hours) {
+        const verdictCard = document.getElementById('verdict-card');
+        const verdictText = document.getElementById('verdict-text');
+        
+        verdictCard.classList.remove('hidden');
+        
+        let verdict = "";
+        let color = "";
+
+        if (level === 'low') {
+            verdict = "✅ Compra Aprobada. A nivel de tiempo, es un gasto asumible que no comprometerá tu calidad de vida.";
+            color = "var(--impact-low)";
+        } else if (level === 'med') {
+            verdict = "⚠️ Piensalo de nuevo. ¿Ese artículo realmente vale tu esfuerzo de varios días de trabajo? Si es una necesidad, adelante; si es un impulso, evítalo.";
+            color = "var(--impact-med)";
+        } else if (level === 'high') {
+            verdict = "🔴 Mala Inversión. Estás cambiando una porción vital de tu tiempo irrecuperable por algo material. Reconsidera urgentemente.";
+            color = "var(--impact-high)";
+        } else {
+            verdict = "❌ Compra Tóxica. Esto es un secuestro de tu tiempo futuro. A menos que sea una emergencia de vida o muerte, cierra la billetera ahora mismo.";
+            color = "var(--impact-extreme)";
+        }
+
+        verdictText.textContent = verdict;
+        
+        gsap.fromTo(verdictCard, 
+            { scale: 0.9, opacity: 0 }, 
+            { scale: 1, opacity: 1, duration: 0.5, delay: 0.4, ease: 'back.out(1.2)' }
+        );
+        
+        gsap.to(verdictCard, { borderColor: color, duration: 0.5 });
     }
 
     // Share functionality
