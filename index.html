@@ -10,11 +10,29 @@
 <body>
     <div class="container">
         <header>
-            <h1>¿Cuántas horas<br>de tu vida <span>cuesta esto?</span></h1>
+            <div class="header-top">
+                <h1>¿Cuántas horas<br>de tu vida <span>cuesta esto?</span></h1>
+                <button id="settings-btn" class="settings-btn" title="Configurar IA">⚙️</button>
+            </div>
             <p>Descubre el valor real de tus compras.</p>
+            
+            <div id="settings-panel" class="settings-panel hidden">
+                <label for="api-key-input">OpenAI API Key (para Juicio IA)</label>
+                <input type="password" id="api-key-input" placeholder="sk-...">
+                <p class="small-hint">Se guarda localmente en tu navegador. Nunca se sube al servidor.</p>
+                <button id="save-settings" class="save-btn">Guardar</button>
+            </div>
         </header>
 
         <main>
+            <div class="input-group">
+                <label for="product-name">¿Qué quieres comprar?</label>
+                <div class="input-wrapper">
+                    <span class="currency-symbol">✨</span>
+                    <input type="text" id="product-name" placeholder="Ej: iPhone 15 Pro, Viaje a Bali..." required>
+                </div>
+            </div>
+
             <div class="input-group">
                 <label for="price">Precio del capricho</label>
                 <div class="input-wrapper">
@@ -56,8 +74,16 @@
                     <p id="emotional-message" class="message"></p>
                     
                     <div id="verdict-card" class="verdict-card hidden">
-                        <h3>Veredicto:</h3>
+                        <h3>Veredicto Financiero:</h3>
                         <p id="verdict-text"></p>
+                    </div>
+
+                    <div id="ai-verdict-card" class="ai-verdict-card hidden">
+                        <div class="ai-header">
+                            <span class="ai-icon">🧠</span>
+                            <h3>Juicio de la IA</h3>
+                        </div>
+                        <p id="ai-verdict-text" class="ai-text">Analizando tu cordura financiera...</p>
                     </div>
                     
                     <button id="share-btn" class="share-btn">

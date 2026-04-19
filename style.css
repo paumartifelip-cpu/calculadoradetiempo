@@ -61,23 +61,57 @@ body {
     border-bottom-right-radius: 12px;
 }
 
-header {
-    text-align: left;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    opacity: 0; /* Starting state for GSAP */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
 }
 
-h1 {
-    font-size: 2.2rem;
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.5px;
+.settings-btn {
+    background: var(--app-bg-top);
+    border: none;
+    font-size: 1.4rem;
+    padding: 0.6rem;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 
+        4px 4px 8px var(--shadow-dark),
+        -4px -4px 8px var(--shadow-light);
+    transition: all 0.3s ease;
 }
 
-h1 span {
-    color: var(--primary);
+.settings-btn:active {
+    box-shadow: 
+        inset 2px 2px 5px var(--shadow-dark),
+        inset -2px -2px 5px var(--shadow-light);
+}
+
+.settings-panel {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 1.2rem;
+    margin: 1rem 0;
+    box-shadow: inset 2px 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+}
+
+.small-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 0.5rem 0;
+}
+
+.save-btn {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 header p {
@@ -308,8 +342,67 @@ button#calculate-btn:active {
     color: var(--text-main);
 }
 
-.verdict-card.hidden {
-    display: none;
+/* AI Verdict Card */
+.ai-verdict-card {
+    background: var(--app-bg-top);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+    box-shadow: 
+        inset 6px 6px 12px var(--shadow-dark),
+        inset -6px -6px 12px var(--shadow-light),
+        0 0 10px rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.ai-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.ai-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.5));
+}
+
+.ai-header h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #8b5cf6;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.ai-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-main);
+    font-style: italic;
+}
+
+/* Cursor Effect */
+.typing::after {
+    content: '|';
+    animation: blink 0.8s infinite;
+    color: #8b5cf6;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.hidden {
+    display: none !important;
 }
 
 .share-btn {
@@ -330,6 +423,7 @@ button#calculate-btn:active {
         4px 4px 10px var(--shadow-dark),
         -4px -4px 10px var(--shadow-light);
     transition: all 0.2s ease;
+    margin-top: 1rem;
 }
 
 .share-btn:hover {
@@ -360,4 +454,3 @@ button#calculate-btn:active {
         display: none;
     }
 }
-

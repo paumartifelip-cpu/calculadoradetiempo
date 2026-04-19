@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const calculateBtn = document.getElementById('calculate-btn');
     const priceInput = document.getElementById('price');
+    const productNameInput = document.getElementById('product-name');
     const salaryInput = document.getElementById('monthly-salary');
     const resultSection = document.getElementById('result-section');
     
@@ -14,6 +15,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const verdictCard = document.getElementById('verdict-card');
     const verdictText = document.getElementById('verdict-text');
     
+    const aiVerdictCard = document.getElementById('ai-verdict-card');
+    const aiVerdictText = document.getElementById('ai-verdict-text');
+    
+    // API KEY Logic (Secure - loaded from localStorage)
+    const apiInput = document.getElementById('api-key-input');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsPanel = document.getElementById('settings-panel');
+    const saveSettings = document.getElementById('save-settings');
+    
+    let OPENAI_API_KEY = localStorage.getItem('openai_api_key') || "";
+    if (OPENAI_API_KEY) apiInput.value = OPENAI_API_KEY;
+
+    settingsBtn.addEventListener('click', () => {
+        settingsPanel.classList.toggle('hidden');
+    });
+
+    saveSettings.addEventListener('click', () => {
+        const key = apiInput.value.trim();
+        if (key) {
+            localStorage.setItem('openai_api_key', key);
+            OPENAI_API_KEY = key;
+            settingsPanel.classList.add('hidden');
+            alert('¡Clave guardada correctamente!');
+        }
+    });
+
     const chips = document.querySelectorAll('.chip');
     let selectedCategory = 'lujo';
     let currentCD = 0;
@@ -28,14 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Initial load animations with GSAP
-    gsap.to('header', { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' });
-    gsap.to('main', { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.2 });
+    // Initial load animations
+    gsap.to('.header-top, header p', { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: 'power3.out' });
+    gsap.to('main', { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.4 });
 
     calculateBtn.addEventListener('click', calculateImpact);
     
     // Enable calculation on Enter key
-    [priceInput, salaryInput].forEach(input => {
+    [priceInput, salaryInput, productNameInput].forEach(input => {
         input.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 calculateImpact();
@@ -43,12 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function calculateImpact() {
+    async function calculateImpact() {
         const price = parseFloat(priceInput.value);
         const monthlySalary = parseFloat(salaryInput.value);
+        const productName = productNameInput.value.trim();
 
-        if (isNaN(price) || isNaN(monthlySalary) || price <= 0 || monthlySalary <= 0) {
-            alert('Por favor, introduce valores numéricos válidos y mayores a 0.');
+        if (isNaN(price) || isNaN(monthlySalary) || price <= 0 || monthlySalary <= 0 || !productName) {
+            alert('Por favor, introduce valores numéricos válidos y el nombre del producto.');
             return;
         }
 
@@ -64,6 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentHours = hours;
 
         showResults(cd, hours, days, sdn);
+        
+        // Trigger AI Verdict
+        getAIVerdict(productName, price, selectedCategory, cd);
     }
 
     function showResults(cd, hours, days, sdn) {
@@ -100,6 +131,61 @@ document.addEventListener('DOMContentLoaded', () => {
         updateVisuals(cd, decision.level);
         setEmotionalMessage(decision.level, hours);
         setVerdict(decision, cd);
+    }
+
+    async function getAIVerdict(product, price, category, cd) {
+        aiVerdictCard.classList.remove('hidden');
+        gsap.to(aiVerdictCard, { opacity: 1, scale: 1, duration: 0.5 });
+
+        if (!OPENAI_API_KEY) {
+            aiVerdictText.textContent = "⚠️ Configura tu API Key en los ajustes (icono ⚙️ arriba) para recibir el veredicto de la IA.";
+            return;
+        }
+
+        aiVerdictText.textContent = "Consultando a mi cerebro superior...";
+        aiVerdictText.classList.add('typing');
+
+        try {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        {
+                            role: "system",
+                            content: "Eres un asesor financiero viral, sarcástico y un poco 'judgy'. Tu objetivo es evaluar si una compra es estúpida o genial basándote en el Índice de Retorno Personal (IRP). Sé breve (máximo 2-3 frases), usa emojis y sé un poco burlón si el Costo en Días (CD) es alto para un Lujo."
+                        },
+                        {
+                            role: "user",
+                            content: `Producto: ${product}. Precio: ${price}€. Categoría: ${category}. Costo en Días (CD): ${cd.toFixed(1)}. ¿Qué opinas?`
+                        }
+                    ],
+                    temperature: 0.8
+                })
+            });
+
+            const data = await response.json();
+            const aiResponse = data.choices[0].message.content;
+            
+            typeWriter(aiVerdictText, aiResponse);
+        } catch (error) {
+            aiVerdictText.textContent = "La IA está descansando ahora mismo... pero mi veredicto humano sigue en pie.";
+            console.error("OpenAI Error:", error);
+        } finally {
+            aiVerdictText.classList.remove('typing');
+        }
+    }
+
+    function typeWriter(element, text, i = 0) {
+        if (i === 0) element.textContent = '';
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            setTimeout(() => typeWriter(element, text, i + 1), 25);
+        }
     }
 
     function getMatrixDecision(cd, cat) {
